@@ -71,9 +71,6 @@ def givens_rotations(A, reduced = False):
     m = A.shape[1]
     Q = np.eye(n)
     R = A.copy()
-    print(Q)
-    print(R)
-    print()
     for j in range(m - 1, -1, -1):
         for i in range(n - 2, j - 1, -1):
             hyp = np.linalg.norm(R[i: i + 2, j])
@@ -87,28 +84,24 @@ def givens_rotations(A, reduced = False):
             R[i: i + 2, j:] = rot @ R[i: i + 2, j:] 
             Q[i: i + 2, :] = rot @ Q[i: i + 2, :] 
             R[i + 1, j] = 0
-            print(Q)
-            print(R)
-            print()
     return Q.T, R
 def solve_llsq(A, b):
     Q, R = householder(A, reduced= True)
     return backSubstitution(R, Q.T @ b)
-def solve_rank_deficient(A, b):
-    n, m = A.shape
-    mat = np.zeros((n + m, m))
-    mat[:n, :] = A
-    mat[n:, :] = np.eye(m)
-    return solve_llsq(A, b)
+def qr_from_upper_hessenberg(A_param, symmetric = False):
+    n, m = A_param.shape
+    Q = np.eye(n)
+    A = A_param.copy()
+    for i in range(m - 1):
+        hyp = np.linalg.norm(A[i:i+2, i])
+        cos = A[i, i] / hyp
+        sin = A[i + 1, i] / hyp
+        G = np.array([[cos, sin], [-sin, cos]])
+        if (symmetric):
+            A[i: i + 2, i: i + 4] = G @ A[i: i + 2, i: i + 4] 
+            Q[i: i + 2, : ] = G @ Q[i: i + 2, : ]
+        else:
+            A[i: i + 2, i:] = G @ A[i: i + 2, i:] 
+            Q[i: i + 2, :] = G @ Q[i: i + 2, :]
+    return Q.T, A
 
-
-A = np.array([
-    [1, -1, 0, 0],
-    [1, -1, 1, 0],
-    [0, -1, 1, 1],
-    [0, 0, 0.25, 1],
-])
-Q, R = givens_rotations(A)
-print()
-print(Q)
-# A = np.random.rand(, 3)
