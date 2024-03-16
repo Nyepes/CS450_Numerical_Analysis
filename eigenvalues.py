@@ -111,7 +111,35 @@ def qr_iteration(A_param, k = 30):
         H = R @ Q
         Q_hessen = Q_hessen @ Q
     return Q_hessen, H
+def lanczos(A, x0, niter):
+    Q = np.zeros((len(x0), niter))
+    T = np.zeros((niter, niter))
+
+
+    q0 = np.zeros_like(x0)
+    q1 = x0 / np.linalg.norm(x0)
+    beta = 0
+
+    Q[:, 0] = q1
+    for i in range(niter - 1):
+        u = A @ q1
+        alpha = q1.T @ u
+        u = u - beta * q0 - alpha * q1
+        beta = np.linalg.norm(u)
+
+        if (beta == 0): break
+        q0 = q1
+        q1 = u / beta
+        Q[:, i + 1] = q1
+
+        T[i, i] = alpha
+        T[i + 1, i] = beta
+        T[i, i + 1] = beta
+    T[-1, -1] = q1.T  @ A @ q1
+    return Q, T
     
+
+
 
 A = np.array([
     [2.9766, 0.3945, 0.4198, 1.1159],
@@ -119,9 +147,23 @@ A = np.array([
     [0.4198, -0.3097, 2.5675, 0.6079],
     [1.1159, 0.1129, 0.6079, 1.7231]
 ])
-qr_iteration(A)
-X, R, Q = orthogonal_iteration(A)
-print(Q)
+
+x0 = np.random.rand(4)
+Q, T = lanczos(A, x0, 5)
+# print(Q)
+# print()
+# print(T)
+a, b = np.linalg.eig(T)
+print(a)
+print(Q @ b)
+
+# print(np.linalg.eigvals(A))
+
+print(np.linalg.eig(A)[1])
+
+# qr_iteration(A)
+# X, R, Q = orthogonal_iteration(A)
+# print(Q)
 # A = np.random.rand(4, 4)
 # x = np.array([0.1, 1.0, 0,0])
 # vecs, val, Q = orthogonal_iteration(A)
