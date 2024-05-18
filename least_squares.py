@@ -58,7 +58,7 @@ def householder(A, reduced = False):
         else:
             u = (z + znorm * ei)
         unorm = u.T @ u
-        for j in range(m):
+        for j in range(i, m):
             R[i:, j] = R[i:, j] - 2 * np.dot(u, R[i:, j]) * u / unorm
         for j in range(n):
             Q[i:, j] = Q[i:, j] - 2 * np.dot(u, Q[i:, j]) * u / unorm
@@ -105,3 +105,23 @@ def qr_from_upper_hessenberg(A_param, symmetric = False):
             Q[i: i + 2, :] = G @ Q[i: i + 2, :]
     return Q.T, A
 
+import numpy as np
+import scipy.linalg as sla
+import matplotlib.pyplot as plt
+
+# 
+
+def getRankKCrossA(A, rank):
+    n = A.shape[0]
+    m = A.shape[1]
+    QA, RA, PA = sla.qr(A, pivoting = True)
+    QAt, RAt, PAt = sla.qr(A.T, pivoting = True)
+    A_r = np.zeros((n, m))
+    Arow = np.zeros((rank, m))
+    Acol = np.zeros((n, rank))
+    A_rr = np.zeros((rank, rank))
+    Arow = (A.T[:, PAt[:rank]]).T
+    Acol = A[:, PA[:rank]]
+    A_rr = A[PAt[:rank], :]
+    A_rr = A_rr[:, PA[:rank]]
+    return Acol @ np.linalg.inv(A_rr) @ Arow, A_rr

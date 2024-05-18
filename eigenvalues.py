@@ -65,7 +65,6 @@ def rayleigh_iteration(A, x, k = 30):
 def simulatenous_iteration(A, k = 30):
     n, m = A.shape
     X = np.random.rand(n, m)
-
     for i in range(k):
         X = A @ X
     return X
@@ -111,15 +110,14 @@ def qr_iteration(A_param, k = 30):
         H = R @ Q
         Q_hessen = Q_hessen @ Q
     return Q_hessen, H
+
 def lanczos(A, x0, niter):
     Q = np.zeros((len(x0), niter))
     T = np.zeros((niter, niter))
 
-
     q0 = np.zeros_like(x0)
     q1 = x0 / np.linalg.norm(x0)
     beta = 0
-
     Q[:, 0] = q1
     for i in range(niter - 1):
         u = A @ q1
@@ -140,39 +138,30 @@ def lanczos(A, x0, niter):
     
 
 
-
 A = np.array([
-    [2.9766, 0.3945, 0.4198, 1.1159],
-    [0.3945, 2.7328, -0.3097, 0.1129],
-    [0.4198, -0.3097, 2.5675, 0.6079],
-    [1.1159, 0.1129, 0.6079, 1.7231]
+
+
+    [0, 1, 0, 0, 0],
+    [0, 0, 1, 0, 0],
+    [0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0]
 ])
+shift = np.cos(np.pi/10) + np.sin(np.pi / 10) * 1j
+A = A - np.eye(5) * shift
 
-x0 = np.random.rand(4)
-Q, T = lanczos(A, x0, 5)
-# print(Q)
-# print()
-# print(T)
-a, b = np.linalg.eig(T)
-print(a)
-print(Q @ b)
-
-# print(np.linalg.eigvals(A))
-
-print(np.linalg.eig(A)[1])
-
-# qr_iteration(A)
-# X, R, Q = orthogonal_iteration(A)
-# print(Q)
-# A = np.random.rand(4, 4)
-# x = np.array([0.1, 1.0, 0,0])
-# vecs, val, Q = orthogonal_iteration(A)
-# print(vecs)
-# print(val)
-
-# print(np.linalg.eig(A))
-# a = np.zeros(4)
-# a[0:2] = -vecs[0, 1:3] / vecs[0, 0]
-# a[2] = 1
-# a = a / np.linalg.norm(a)
-# print(a)
+vec = np.random.rand(5)
+A_inv = np.linalg.inv(A)
+for _ in range(50):
+    vec = A_inv @ vec
+    vec = vec / np.linalg.norm(vec)
+print(vec * np.linalg.norm(vec, ord=float('inf')))
+print(A @ vec)
+print
+# print(inverse_iteration(A, normalized = False))
+# A = np.array([
+#     [2.9766, 0.3945, 0.4198, 1.1159],
+#     [0.3945, 2.7328, -0.3097, 0.1129],
+#     [0.4198, -0.3097, 2.5675, 0.6079],
+#     [1.1159, 0.1129, 0.6079, 1.7231]
+# ])
